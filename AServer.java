@@ -12,24 +12,29 @@ public class AServer {
 
             while (true) {
                 Socket clienteSocket = serverSocket.accept();
-                BufferedReader entrada = new BufferedReader(new InputStreamReader(clienteSocket.getInputStream()));
-                String mensagem = entrada.readLine();
 
+                BufferedReader entrada = new BufferedReader(new InputStreamReader(clienteSocket.getInputStream()));
+                PrintWriter saidaCliente = new PrintWriter(clienteSocket.getOutputStream(), true);
+
+                String mensagem = entrada.readLine();
                 System.out.println("Consulta recebida: " + mensagem);
 
-                // Consulta aos workers
                 String respostaSuperior = consultarWorker("localhost", 23456, mensagem);
                 String respostaInferior = consultarWorker("localhost", 23457, mensagem);
 
-                System.out.println("\n=== Resultados encontrados ===");
+                StringBuilder respostaFinal = new StringBuilder();
+                respostaFinal.append("=== Resultados encontrados ===\n\n");
 
-                System.out.println("\n--- Resultados da metade INFERIOR ---");
-                exibirFormatado(respostaInferior);
+                respostaFinal.append("--- Metade SUPERIOR ---\n");
+                respostaFinal.append(formatarResultado(respostaSuperior)).append("\n");
 
-                System.out.println("\n--- Resultados da metade SUPERIOR ---");
-                exibirFormatado(respostaSuperior);
+                respostaFinal.append("--- Metade INFERIOR ---\n");
+                respostaFinal.append(formatarResultado(respostaInferior)).append("\n");
 
-                System.out.println("=====================================\n");
+                respostaFinal.append("================================\n");
+
+                // Envia para o cliente
+                saidaCliente.println(respostaFinal.toString());
 
                 clienteSocket.close();
             }
@@ -59,28 +64,30 @@ public class AServer {
         return resposta.toString();
     }
 
-    private static void exibirFormatado(String jsonText) {
+    private static String formatarResultado(String jsonText) {
+        StringBuilder sb = new StringBuilder();
+
         if (jsonText.trim().isEmpty()) {
-            System.out.println("Nenhum resultado.");
-            return;
+            sb.append("Nenhum resultado.\n");
+            return sb.toString();
         }
 
         try {
-            // Cada linha é um JSON
             String[] linhas = jsonText.split("\n");
             for (String linha : linhas) {
                 if (linha.trim().isEmpty()) continue;
 
                 JSONObject obj = new JSONObject(linha);
-                String titulo = obj.optString("title", "(sem título)");
+                String titulo = obj.optString("title", "(sem titulo)");
                 String resumo = obj.optString("abstract", "(sem resumo)");
 
-                System.out.println("Titulo: " + titulo);
-                System.out.println("Resumo: " + resumo);
-                System.out.println();
+                sb.append("Titulo: ").append(titulo).append("\n");
+                sb.append("Resumo: ").append(resumo).append("\n\n");
             }
         } catch (JSONException e) {
-            System.out.println("Erro ao interpretar JSON: " + e.getMessage());
+            sb.append("Erro ao interpretar JSON: ").append(e.getMessage()).append("\n");
         }
+
+        return sb.toString();
     }
 }

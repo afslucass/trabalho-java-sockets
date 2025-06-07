@@ -8,8 +8,8 @@ Abrindo o projeto no VS Code, o arquivo WorkerServer.java vai apresentar mensage
 
 1. javac -cp .\json-20230618.jar AServer.java
 2. javac ./Client.java
-3. javac javac -cp .\json-20230618.jar BServer.java .\WorkerServer.java
-4. javac javac -cp .\json-20230618.jar CServer.java .\WorkerServer.java
+3. javac -cp .\json-20230618.jar BServer.java .\WorkerServer.java
+4. javac -cp .\json-20230618.jar CServer.java .\WorkerServer.java
 
 ## Rodar (Em terminais separados)
 
